@@ -1,0 +1,338 @@
+<title>turbogizzmo · Build Log</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  /* Layout: schematic-grid canvas; sticky rail header; hero thesis; filterable card wall.
+     Palette reads like a lab bench at night — ink board, copper trace, signal teal. */
+  :root {
+    --bg: #faf6ef;
+    --board: #f1eade;
+    --surface: #ffffff;
+    --surface-2: #f5efe6;
+    --line: #e2d8c8;
+    --fg: #1c1a17;
+    --muted: #6b6456;
+    --faint: #938a79;
+    --accent: #b5672a;       /* copper */
+    --accent-soft: #f0dcc7;
+    --signal: #157f73;       /* teal */
+    --signal-soft: #d6ebe6;
+    --grid: rgba(28,26,23,0.045);
+    --shadow: 0 1px 2px rgba(28,26,23,0.06), 0 10px 30px -18px rgba(28,26,23,0.35);
+    --radius: 14px;
+    --f-display: "Chakra Petch", "Trebuchet MS", sans-serif;
+    --f-body: "IBM Plex Sans", system-ui, sans-serif;
+    --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1013;
+      --board: #12161b;
+      --surface: #161b21;
+      --surface-2: #1b2127;
+      --line: #28303a;
+      --fg: #eef1f3;
+      --muted: #9aa6b2;
+      --faint: #6b7682;
+      --accent: #e39a52;
+      --accent-soft: #3a2a19;
+      --signal: #4fd1c0;
+      --signal-soft: #11312e;
+      --grid: rgba(255,255,255,0.035);
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 18px 40px -22px rgba(0,0,0,0.8);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1013;
+    --board: #12161b;
+    --surface: #161b21;
+    --surface-2: #1b2127;
+    --line: #28303a;
+    --fg: #eef1f3;
+    --muted: #9aa6b2;
+    --faint: #6b7682;
+    --accent: #e39a52;
+    --accent-soft: #3a2a19;
+    --signal: #4fd1c0;
+    --signal-soft: #11312e;
+    --grid: rgba(255,255,255,0.035);
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 18px 40px -22px rgba(0,0,0,0.8);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--f-body);
+    background-color: var(--bg);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: var(--fg);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+  }
+  a { color: inherit; }
+
+  /* ---- header ---- */
+  header {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    z-index: 21;
+    background: var(--bg);
+  }
+  .bar {
+    display: flex; align-items: center; gap: 14px;
+    padding-block: 12px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; font-family: var(--f-mono); font-weight: 600; }
+  .brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 4px var(--signal-soft); align-self: center; }
+  .brand b { font-weight: 600; letter-spacing: .3px; }
+  .brand span { color: var(--faint); font-size: .8rem; }
+  .bar .spacer { flex: 1; }
+  .ghlink, .toggle {
+    font-family: var(--f-mono); font-size: .8rem;
+    border: 1px solid var(--line); background: var(--surface);
+    color: var(--fg); border-radius: 9px; padding: 7px 11px;
+    text-decoration: none; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+    transition: border-color .15s, transform .15s;
+  }
+  .ghlink:hover, .toggle:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+  /* ---- hero ---- */
+  .hero { padding-block: 54px 30px; }
+  .eyebrow {
+    font-family: var(--f-mono); font-size: .78rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent); margin: 0 0 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::before { content: ""; width: 26px; height: 1px; background: var(--accent); }
+  h1 {
+    font-family: var(--f-display); font-weight: 700;
+    font-size: clamp(2.1rem, 6vw, 3.9rem); line-height: 1.04;
+    margin: 0 0 20px; letter-spacing: -.01em; text-wrap: balance;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .lede { font-size: clamp(1.02rem, 2.2vw, 1.22rem); color: var(--muted); max-width: 60ch; margin: 0; }
+
+  .stats { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+  .stat {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--surface); padding: 12px 16px; min-width: 120px; flex: 1;
+    box-shadow: var(--shadow);
+  }
+  .stat .n { font-family: var(--f-display); font-weight: 700; font-size: 1.7rem; font-variant-numeric: tabular-nums; }
+  .stat .l { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+
+  /* ---- filters ---- */
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 40px 0 22px; position: sticky; top: calc(env(safe-area-inset-top,0px) + 52px); z-index: 10; }
+  .chip {
+    font-family: var(--f-mono); font-size: .8rem;
+    border: 1px solid var(--line); background: var(--surface);
+    color: var(--muted); border-radius: 999px; padding: 7px 14px; cursor: pointer;
+    transition: all .15s; white-space: nowrap;
+  }
+  .chip:hover { color: var(--fg); border-color: var(--accent); }
+  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  :root[data-theme="dark"] .chip[aria-pressed="true"],
+  :root:not([data-theme="light"]) .chip[aria-pressed="true"] { color: #140d06; }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .chip[aria-pressed="true"] { color:#fff; } }
+
+  /* ---- grid ---- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; padding-bottom: 20px; }
+  .card {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--surface); padding: 18px 18px 16px;
+    display: flex; flex-direction: column; gap: 11px;
+    box-shadow: var(--shadow); position: relative; overflow: hidden;
+    transition: transform .16s, border-color .16s;
+  }
+  .card::before {
+    content: ""; position: absolute; inset: 0 auto 0 0; width: 3px;
+    background: var(--accent); opacity: 0; transition: opacity .16s;
+  }
+  .card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
+  .card:hover::before { opacity: 1; }
+  .card .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .card h3 { font-family: var(--f-display); font-weight: 600; font-size: 1.12rem; margin: 0; letter-spacing: -.005em; }
+  .card .cat { font-family: var(--f-mono); font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); white-space: nowrap; margin-top: 4px; }
+  .card p { margin: 0; font-size: .9rem; color: var(--muted); flex: 1; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-family: var(--f-mono); font-size: .7rem; color: var(--signal); background: var(--signal-soft); border-radius: 6px; padding: 2px 7px; }
+  .links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
+  .lk {
+    font-family: var(--f-mono); font-size: .76rem; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 10px; border-radius: 8px; border: 1px solid var(--line);
+    color: var(--fg); transition: all .14s;
+  }
+  .lk:hover { border-color: var(--accent); color: var(--accent); }
+  .lk.live { border-color: color-mix(in srgb, var(--signal) 45%, var(--line)); }
+  .lk.live:hover { border-color: var(--signal); color: var(--signal); }
+  .flag { font-family: var(--f-mono); font-size: .72rem; padding: 5px 10px; border-radius: 8px; color: var(--faint); background: var(--surface-2); }
+
+  footer { border-top: 1px solid var(--line); margin-top: 30px; padding-block: 28px 44px; color: var(--faint); font-size: .85rem; }
+  footer .fnote { font-family: var(--f-mono); font-size: .78rem; }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header>
+  <div class="wrap bar">
+    <span class="brand"><span class="dot"></span><b>turbogizzmo</b><span>// build log</span></span>
+    <span class="spacer"></span>
+    <button class="toggle" id="theme" aria-label="Toggle color theme">◐ theme</button>
+    <a class="ghlink" href="https://github.com/turbogizzmo" target="_blank" rel="noopener">github ↗</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <p class="eyebrow">Systems engineer &amp; independent builder</p>
+    <h1>I build the <em>tools, networks, and oddities</em> that keep businesses and homes running.</h1>
+    <p class="lede">A working inventory of what I ship: local-first desktop apps, firewall and camera infrastructure, home-automation rigs, a few games, and clean-room rebuilds of software the world forgot. Some public, some private, all real.</p>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <nav class="filters" id="filters" aria-label="Filter projects by category"></nav>
+  <section class="grid" id="grid"></section>
+
+  <footer>
+    <p class="fnote">Curated from GitHub (<a href="https://github.com/turbogizzmo" target="_blank" rel="noopener">@turbogizzmo</a>) and the local workbench. Private repos are shown for context; their source isn't public. Internal network/client workspaces with live credentials are deliberately left off.</p>
+  </footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- theme toggle (per-viewer convenience) ----
+  var root = document.documentElement, tbtn = document.getElementById("theme");
+  try { var saved = localStorage.getItem("tg-theme"); if (saved) root.setAttribute("data-theme", saved); } catch (e) {}
+  tbtn.addEventListener("click", function () {
+    var now = root.getAttribute("data-theme");
+    var dark = now ? now === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("tg-theme", next); } catch (e) {}
+  });
+
+  // ---- data ----
+  var P = [
+    // Products
+    ["LocalBooks","Products","Local-first double-entry accounting for small businesses — books live in one SQLite file on your machine. No cloud, no account, self-updating.",["Rust","Tauri","React","SQLite"],{code:"https://github.com/turbogizzmo/LocalBooks",live:"https://turbogizzmo.github.io/LocalBooks/"}],
+    ["Wave Exit","Products","Desktop app for accountants to pull a business's books out of Wave Accounting — checked once, then exported as archives, Excel workbooks, PDF packs, and import files.",["TypeScript","Tauri"],{code:"https://github.com/turbogizzmo/wave-exit",live:"https://turbogizzmo.github.io/wave-exit/"}],
+    ["Aegis Pulse","Products","AI-assisted, privacy-conscious Windows health & security checkup — a read-only PowerShell collector feeds deterministic rules first, AI narration second.",["Next.js","PowerShell"],{priv:1}],
+    ["Synology Chat+","Products","A native desktop client for Synology Chat (macOS), plus a packaged Android build — a nicer front end than the stock web app.",["Rust"],{code:"https://github.com/turbogizzmo/synology-chatplus-desktop-OSX"}],
+    ["ChoreQuest","Products","A gamified family chore manager with full RPG theming — quest board, XP and ranks, custom SVG avatars, and levelling pets. Personal fork with added fixes.",["JavaScript"],{code:"https://github.com/turbogizzmo/ChoreQuest",fork:1}],
+
+    // Games
+    ["SkiFree 2026","Games","A modern high-resolution reboot of the classic SkiFree downhill formula — endless slope, GPU rendering, responsive canvas.",["TypeScript","PixiJS"],{local:1}],
+    ["SlopeEscape","Games","The downhill-escape idea rebuilt in Rust as a native game — the performance path for the SkiFree concept.",["Rust"],{priv:1}],
+    ["Data Center Defense","Games","A browser tower-defense set in a data center — hold the racks against the incoming load.",["HTML","JavaScript"],{priv:1}],
+    ["Borzoi Maze","Games","A browser maze game starring a very long dog. Exactly as serious as it sounds.",["HTML","JavaScript"],{priv:1}],
+    ["Mowing Game","Games","A satisfying browser lawn-mowing game — every blade accounted for.",["JavaScript"],{priv:1}],
+    ["Venmo Coin Arcade","Games","Pay-by-Venmo QR that drops a credit into a real skill-crane machine, driven by an ESP32. Arcade hardware meets mobile payments.",["ESP32","Python"],{local:1}],
+
+    // Retro
+    ["LogicDesigner","Retro","A clean-room browser rebuild of Electronix Designer / LogicDesigner 1.8.1 (1995) — reconstructed from decoded file formats and shipped resources, since no source survived.",["JavaScript"],{local:1}],
+    ["EtherMagic","Retro","A modernized rebuild of a legacy Android PLC control app — brought up to current SDKs, AndroidX, and modern runtime permissions.",["Java","Android"],{priv:1}],
+    ["Acropalypse Multi-Tool","Retro","A browser-delivered Docker wrapper around the aCropalypse screenshot-recovery tool — runs the desktop app on a virtual display and streams it over noVNC, so nothing installs on macOS.",["Docker","noVNC"],{local:1}],
+
+    // Network & Infra
+    ["AP303 → AP11D","Network","Converting Aruba AP-303H campus access points into HPE Instant On AP11D units — tooling plus a full lab log of where Instant On firmware comes from.",["Python","Firmware"],{code:"https://github.com/turbogizzmo/AP303H2AP11D"}],
+    ["Aruba Instant On · HA","Network","A read-only Home Assistant custom integration for cloud-managed Aruba Instant On sites — clients, networks, and site health as HA entities.",["Python","Home Assistant"],{code:"https://github.com/turbogizzmo/ArubaInstantOnPortalHA"}],
+    ["Aruba Backup Portal","Network","A read-only backup product for cloud-managed Aruba sites — a Streamlit dashboard with site selection, backup history, and snapshot capture. No restore, no writes.",["Python","Streamlit"],{priv:1}],
+    ["pfSense Dashboard","Network","A Grafana-style NOC/SOC dashboard for pfSense with an optional read-only API proxy — a curated customer/executive portal shell over the real monitoring stack.",["JavaScript","Grafana"],{priv:1}],
+    ["pfFocus","Network","Turns a pfSense configuration backup into meaningful, readable output — documentation you can actually review.",["Python"],{code:"https://github.com/turbogizzmo/pfFocus",fork:1}],
+    ["VMware Health Checkup","Network","A read-only PowerCLI vSphere discovery and audit run from macOS — inventory, networking, storage, risk flags, and a markdown report, changing nothing.",["PowerShell","PowerCLI"],{local:1}],
+
+    // IoT & Home
+    ["wyze-bridge-unifi","IoT","A standalone fork that bridges Wyze cameras into UniFi Protect over ONVIF — preserving the Python + ONVIF path upstream projects abandoned.",["Python","Docker","ONVIF"],{code:"https://github.com/turbogizzmo/wyze-bridge-unifi"}],
+    ["Samsung Frame Art","IoT","Automation plus curated art collections that push artwork to a Samsung Frame TV — abstracts, classics, and a few guilty pleasures on a schedule.",["Python"],{local:1}],
+    ["Home Assistant Rig","IoT","A working home-automation setup — adaptive HVAC pre-cooling, bedtime announcements, presence-aware Frame art, and custom dashboards.",["Python","YAML"],{local:1}],
+    ["FinnWatch","IoT","A Bluetooth-LE scanner in Swift for presence and tag tracking around the house.",["Swift","BLE"],{local:1}],
+
+    // Business & Tools
+    ["MSP Cost Calculator","Business","Web tools for MSP sales conversations — compares the true cost of in-house IT against an MSP quote, with roles, regional salary multipliers, overhead, and compliance add-ons.",["HTML","JavaScript"],{live:"https://mspcalc.computers-byte.com"}],
+    ["GoDaddy Cost Dashboard","Business","A local dashboard aggregating GoDaddy domains, DNS, orders, and spend trends — with orphan-subscription and cost-reduction recommendations.",["Node.js","JavaScript"],{self:1}],
+    ["plex-autoupdate","Business","Keeps Plex Media Server current (stable or Plex Pass) without hand-holding.",["Shell"],{code:"https://github.com/turbogizzmo/plex-autoupdate",fork:1}],
+
+    // Civic & Local
+    ["Ortonville Property Intel","Civic","A property-intelligence research tool pulling together records for local real estate.",["Python"],{priv:1}],
+    ["Ortonville Driving Tour","Civic","A self-guided driving-tour web app for the town — routed stops with narration.",["JavaScript"],{priv:1}],
+    ["Know Thy Neighbor","Civic","A web app to look up neighbors by address — Node/Express backend with a modern JS front end.",["Node.js","Express"],{priv:1}],
+    ["AirBait & Tackle","Civic","An Airbnb-style booking site for exactly one property: the family fish house.",["TypeScript"],{priv:1}]
+  ];
+
+  var cats = ["All","Products","Games","Retro","Network","IoT","Business","Civic"];
+  var catLabel = {Network:"Network & Infra", IoT:"IoT & Home", Civic:"Civic & Local"};
+
+  // ---- stats ----
+  var pub = P.filter(function(p){return p[4].code||p[4].live;}).length;
+  var langs = {}; P.forEach(function(p){p[3].forEach(function(t){langs[t]=1;});});
+  var stats = [[P.length,"projects"],[pub,"public / live"],[Object.keys(langs).length,"stacks"],[cats.length-1,"domains"]];
+  document.getElementById("stats").innerHTML = stats.map(function(s){
+    return '<div class="stat"><div class="n">'+s[0]+'</div><div class="l">'+s[1]+'</div></div>';
+  }).join("");
+
+  // ---- filters ----
+  var fwrap = document.getElementById("filters");
+  fwrap.innerHTML = cats.map(function(c,i){
+    return '<button class="chip" data-cat="'+c+'" aria-pressed="'+(i===0)+'">'+(catLabel[c]||c)+'</button>';
+  }).join("");
+
+  // ---- render ----
+  var grid = document.getElementById("grid");
+  function esc(s){return s.replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+  function card(p){
+    var name=p[0], cat=p[1], desc=p[2], tags=p[3], L=p[4];
+    var links="";
+    if(L.live) links+='<a class="lk live" href="'+L.live+'" target="_blank" rel="noopener">live ↗</a>';
+    if(L.code) links+='<a class="lk" href="'+L.code+'" target="_blank" rel="noopener">'+(L.fork?"fork":"code")+' ↗</a>';
+    if(!L.code && L.fork) links+='<span class="flag">fork</span>';
+    if(L.priv) links+='<span class="flag">private</span>';
+    if(L.local) links+='<span class="flag">local</span>';
+    if(L.self) links+='<span class="flag">self-hosted</span>';
+    return '<article class="card" data-cat="'+cat+'">'+
+      '<div class="top"><h3>'+esc(name)+'</h3><span class="cat">'+(catLabel[cat]||cat)+'</span></div>'+
+      '<p>'+esc(desc)+'</p>'+
+      '<div class="tags">'+tags.map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join("")+'</div>'+
+      '<div class="links">'+links+'</div>'+
+    '</article>';
+  }
+  function draw(cat){
+    var list = cat==="All" ? P : P.filter(function(p){return p[1]===cat;});
+    grid.innerHTML = list.map(card).join("");
+  }
+  draw("All");
+
+  fwrap.addEventListener("click", function(e){
+    var b = e.target.closest(".chip"); if(!b) return;
+    [].forEach.call(fwrap.children, function(c){ c.setAttribute("aria-pressed", c===b); });
+    draw(b.getAttribute("data-cat"));
+  });
+})();
+</script>
