@@ -177,6 +177,7 @@
   .card .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
   .card h3 { font-family: var(--f-display); font-weight: 600; font-size: 1.12rem; margin: 0; letter-spacing: -.005em; }
   .card .cat { font-family: var(--f-mono); font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); white-space: nowrap; margin-top: 4px; }
+  .card .shot { display: block; width: calc(100% + 36px); margin: -18px -18px 2px; aspect-ratio: 16 / 9; object-fit: cover; background: #0b0d12; border-bottom: 1px solid var(--line); }
   .card p { margin: 0; font-size: .9rem; color: var(--muted); flex: 1; }
   .tags { display: flex; flex-wrap: wrap; gap: 6px; }
   .tag { font-family: var(--f-mono); font-size: .7rem; color: var(--signal); background: var(--signal-soft); border-radius: 6px; padding: 2px 7px; }
@@ -282,7 +283,7 @@
     // Business & Tools
     ["MSP Cost Calculator","Business","Web tools for MSP sales conversations — compares the true cost of in-house IT against an MSP quote, with roles, regional salary multipliers, overhead, and compliance add-ons.",["HTML","JavaScript"],{live:"https://mspcalc.computers-byte.com"}],
     ["GoDaddy Cost Dashboard","Business","A local dashboard aggregating GoDaddy domains, DNS, orders, and spend trends — with orphan-subscription and cost-reduction recommendations.",["Node.js","JavaScript"],{self:1}],
-    ["Plexonauts","Business","A live Plex activity room: everyone watching shows up as an astronaut wandering a lounge of couches and screens, fed by Plex logs and Tautulli over a websocket.",["Python","JavaScript"],{code:"https://github.com/turbogizzmo/plexonauts"}],
+    ["Plexonauts","Business","A live Plex activity room: everyone on the server shows up as an astronaut in a retro movie theater — browsing the video store, hanging in the lobby, or seated at one of eight screens playing what they stream. Fed live by Plex logs and Tautulli over a websocket.",["Python","JavaScript"],{code:"https://github.com/turbogizzmo/plexonauts",vid:"media/plexonauts.mp4",poster:"media/plexonauts.jpg"}],
     ["plex-autoupdate","Business","Keeps Plex Media Server current (stable or Plex Pass) without hand-holding.",["Shell"],{code:"https://github.com/turbogizzmo/plex-autoupdate",fork:1}],
 
     // Civic & Local
@@ -313,8 +314,12 @@
   // ---- render ----
   var grid = document.getElementById("grid");
   function esc(s){return s.replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
+  var still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   function card(p){
     var name=p[0], cat=p[1], desc=p[2], tags=p[3], L=p[4];
+    var shot="";
+    if(L.vid) shot='<video class="shot" src="'+L.vid+'" poster="'+L.poster+'" muted loop playsinline preload="metadata"'+(still?"":" autoplay")+' aria-label="'+esc(name)+' demo"></video>';
+    else if(L.img) shot='<img class="shot" src="'+L.img+'" alt="'+esc(name)+' screenshot" loading="lazy">';
     var links="";
     if(L.live) links+='<a class="lk live" href="'+L.live+'" target="_blank" rel="noopener">live ↗</a>';
     if(L.code) links+='<a class="lk" href="'+L.code+'" target="_blank" rel="noopener">'+(L.fork?"fork":"code")+' ↗</a>';
@@ -323,6 +328,7 @@
     if(L.local) links+='<span class="flag">local</span>';
     if(L.self) links+='<span class="flag">self-hosted</span>';
     return '<article class="card" data-cat="'+cat+'">'+
+      shot+
       '<div class="top"><h3>'+esc(name)+'</h3><span class="cat">'+(catLabel[cat]||cat)+'</span></div>'+
       '<p>'+esc(desc)+'</p>'+
       '<div class="tags">'+tags.map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join("")+'</div>'+
